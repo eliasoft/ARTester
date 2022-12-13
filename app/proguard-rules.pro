@@ -1,0 +1,9 @@
+-keep class eliasoft.artester.* { *; }
+-keep class com.sun.tools.classfile.* { *; }
+-dontobfuscate
+-dontoptimize
+-dontpreverify
+-android
+-keepattributes LineNumberTable,SourceFile
+-printconfiguration build/bin/proguard-configuration.txt
+-printusage build/bin/proguard-usage.txt

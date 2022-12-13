@@ -1,0 +1,14 @@
+[
+  {
+    "artifactId": "r8",
+    "excludes": [],
+    "groupId": "com.android.tools",
+    "versionName": "3.3.75"
+  },
+  {
+    "artifactId": "annotation",
+    "excludes": [],
+    "groupId": "androidx.annotation",
+    "versionName": "1.5.0"
+  }
+]

@@ -1,0 +1,1 @@
+## The classes in this directory are also used in other projects that I am developing.  I know these classes should be in a separate module from this one, but I don't do that yet because CodeAssist doesn't support modules yet.

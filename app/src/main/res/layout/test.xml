@@ -1,0 +1,42 @@
+<!--
+* Copyright (C) 2022 ELIASoft <eliasoft.developer@gmail.com>.
+*
+* This file is part of ARTester.
+*
+* ARTester is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:gravity="center_horizontal" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@android:color/black" android:paddingTop="12dp" style="@style/ll">
+	<LinearLayout android:id="@+id/firstButtons" android:orientation="horizontal" android:gravity="center">
+		<Button android:text="Reload project" android:onClick="reloadProject" android:layout_marginRight="16dp" style="@style/testBtn"/>
+		<Switch android:layout_weight="1" android:text="Console test mode" android:checked="true" android:layout_marginRight="12dp"/>
+	</LinearLayout>
+	<View android:background="@android:color/white" android:layout_width="match_parent" android:layout_height="1px" android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
+	<LinearLayout android:id="@+id/test_modes_container" style="@style/match_parent">
+		<LinearLayout android:orientation="vertical" style="@style/match_parent">
+			<LinearLayout android:orientation="horizontal" android:gravity="center" android:layout_marginBottom="4dp">
+				<Switch android:layout_weight="1" android:text="Auto scroll" android:onClick="toggleAutoScroll" android:layout_marginRight="12dp"/>
+				<Switch android:layout_weight="1" android:text="Text wrap" android:onClick="toggleTextWrap" android:layout_marginRight="12dp"/>
+				<Button android:text="Copy to clipboard" android:onClick="copyTextToClipboard" style="@style/testBtn"/>
+			</LinearLayout>
+			<ScrollView style="@style/match_parent">
+				<HorizontalScrollView android:layout_width="match_parent">
+					<TextView android:id="@+id/consoleTextView" android:textIsSelectable="true" android:gravity="bottom"/>
+					<!-- (android:textIsSelectable="true" and android:gravity="bottom") are required to allow auto scrolling in a TextView -->
+				</HorizontalScrollView>
+			</ScrollView>
+		</LinearLayout>
+		<!-- My View -->
+	</LinearLayout>
+</LinearLayout>
