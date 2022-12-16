@@ -118,9 +118,11 @@ public class TestActivity extends ConsoleActivity implements
 		@Override public void write(int i) throws IOException{append(String.valueOf(i));}
 		@Override public void write(byte[] b) throws IOException{append(new String(b));}
 		@Override public void write(byte[] b, int off, int len) throws IOException{append(new String(b, off, len));}
+		private int skipAppLoggerInitialization;// intended to skip the first System.err.println() from BaseApplication.onCreate() method.
 		private StringBuilder report;
 		private Thread pauseDetector;
 		private void append(String s){
+			if((skipAppLoggerInitialization++)<2)return;
 			if(pauseDetector!=null)pauseDetector.interrupt();
 			else report=new StringBuilder();
 			report.append(s);

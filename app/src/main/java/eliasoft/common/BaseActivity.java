@@ -18,16 +18,6 @@ package eliasoft.common;
 
 public class BaseActivity extends android.app.Activity{
 
-	@Override protected void onCreate(android.os.Bundle savedInstanceState){
-		super.onCreate(savedInstanceState);
-		if(!BaseApplication.ref.loggerIsEnabled&&!BaseApplication.prefs().contains("do not alert when logger is disabled"))java.util.concurrent.Executors.newSingleThreadExecutor().execute(()->{
-			try{Thread.sleep(500);
-				if(!BaseApplication.ref.loggerIsEnabled)BaseApplication.showDialog(this, new android.app.AlertDialog.Builder(this).setTitle("ERROR!").setCancelable(false).setPositiveButton("KILL APP", (a, b)->System.exit(0)).setNegativeButton("disable this alert", (a, b)->{
-					a.dismiss();android.content.SharedPreferences.Editor spe=BaseApplication.prefs().edit();spe.putBoolean("do not alert when logger is disabled", true);spe.apply();
-				}).setMessage("This app cannot work because you have disabled logcat on this device.\n To solve this. Go to: Developer options > Logger Buffer Size, and set it to 64K.\n If you have done the above, you should tap on \"KILL APP\" and then open this app again. But if you can't get this alert to stop appearing, tap the \"disable this alert\" button."));
-			}catch(InterruptedException ie){}
-		});
-	}
 	@Override protected void onResume(){
 		super.onResume();
 		// if the user pauses the Activity while the Spinner3D is showing, and later the user resumes the Activity, the position offset of the Spinner3D will be moved incorrectly to an inapropiated position in the screen. The following line is intended to fix such behavior.

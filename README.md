@@ -26,7 +26,7 @@ The development of this app was possible thanks to [CodeAssist][CA], because tha
 ## First steps
 1. Download and install the [**ARTester.apk**](https://github.com/eliasoft/ARTester/raw/main/ARTester.apk) file that you will find in the root directory of this repository
 2. Open the app and do the initial setup
-3. Then click on the button **Create new example project**, and finally follow the instructions that will be indicated there.
+3. Watch the following demo video: https://youtu.be/-dYbvkjAlv4
 
 ##### If you want to be notified every time a new version of ARTester is released, perform the following steps:
  1. Sign in or sign up for Github, and then return to this page.

@@ -23,6 +23,6 @@ ext {
     minSdkVersion = 23
 
     applicationId = "eliasoft.artester"
-    versionCode = 4
-    versionName = "1.2"
+    versionCode = 5
+    versionName = "1.2.5"
 }
