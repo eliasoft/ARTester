@@ -23,6 +23,7 @@ import android.text.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.Executors;
 
 public abstract class BaseApplication extends Application implements
 																Thread.UncaughtExceptionHandler{
@@ -67,15 +68,29 @@ public abstract class BaseApplication extends Application implements
 		super.onCreate();ref=this;
 		try{APP_LABEL_AND_VERSION=getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(getPackageName(),0))+" v"+getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(android.content.pm.PackageManager.NameNotFoundException nnfe){}
 		Thread.setDefaultUncaughtExceptionHandler(this);
-		readLogcat("logcat System.err:W *:S");
-		readLogcat("logcat -b crash");
+		readLogcat("logcat System.err:W *:S");readLogcat("logcat -b crash");
+		Executors.newSingleThreadExecutor().execute(()->{try{
+			Thread.sleep(200);System.err.println("check if logger is enabled");
+			Thread.sleep(500);if(!loggerIsEnabled)System.setErr(new PrintStream(new OutputStream(){
+				@Override public void write(int i) throws IOException{append(String.valueOf(i));}
+				@Override public void write(byte[] b) throws IOException{append(new String(b));}
+				@Override public void write(byte[] b, int off, int len) throws IOException{append(new String(b, off, len));}
+				private StringBuilder crashData;
+				private void append(String s){
+					if(crashData==null)crashData=new StringBuilder();
+					processCrashDataLine(crashData, s);
+				}
+			}));
+		}catch(InterruptedException ie){}});
 	}
 
 	@Override public final void uncaughtException(Thread t, Throwable th){
-		// the logic will be managed from the readLogcat() method. see comments at the readLogcat() method.
+		if(!loggerIsEnabled)th.printStackTrace();
+		// the else logic will be managed from the readLogcat() method. see comments at the readLogcat() method.
 	}
 	protected abstract void manageCrashReport(String crashData, String extraData);
 	volatile boolean loggerIsEnabled;// set to true if the value of "logger buffer size" setting within Developer options, it's other than off.
+	volatile Thread crashProcessingPauseDetector;
 
 	private void readLogcat(String command){
 		/* Some time ago I faced a strange problem that I had a hard time solving, because it was an exception that occurred very infrequently, and which came from the native Android library: "/system/lib/libhwui.so".
@@ -96,27 +111,30 @@ public abstract class BaseApplication extends Application implements
 		* 	ioe.printStackTrace();// cause the app to crash.	
 		* }
 		*/
-		java.util.concurrent.Executors.newSingleThreadExecutor().execute(()->{try{
+		Executors.newSingleThreadExecutor().execute(()->{try{
 			StringBuilder crashData=new StringBuilder();
 			BufferedReader logcatReader=new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec(command).getInputStream()));
 			// I tried the logcat -c and -T commands, but they didn't work for me. So I had to write some code to skip the log entries that I already read the last time the app crashed.
 			Date now=new Date();now.setYear(70/*means 1970*/); java.text.SimpleDateFormat logcatDateFormatExcludingMilliseconds=new java.text.SimpleDateFormat("MM-dd kk:mm:ss");
-			Thread pauseDetector=null;
 			String l;while((l=logcatReader.readLine())!=null){
-				if(l.startsWith("---")){loggerIsEnabled=true;continue;}
+				if(l.startsWith("---"))continue;
+				if(l.contains("W System.err: check if logger is enabled")){loggerIsEnabled=true;continue;}
 				if(logcatDateFormatExcludingMilliseconds.parse(l.substring(0,l.indexOf("."))).before(now))continue;
-				if(pauseDetector!=null)pauseDetector.interrupt();
-				else startActivity(new android.content.Intent(ref, BaseApplication.DetectedErrorPrintingActivity.class).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));
-				crashData.append(l.substring(l.substring(0, l.lastIndexOf(" ", l.indexOf(": "))).length()-1).replaceAll(",? [a-zA-Z]+:?.?[0-9]+","")).append("\n");
-				pauseDetector=new Thread(()->{
-					try{Thread.sleep(200);
-						if(!logs.isEmpty()){crashData.append("--------- beginning of my custom logs\n");for(String otherLog: logs){crashData.append(otherLog).append("\n");}}
-						manageCrashReport(crashData.toString(), getExtraData());
-						System.exit(0);// at this point, it is obligatory to kill the process of the app.
-					}catch(Exception e){}
-				});pauseDetector.start();
+				processCrashDataLine(crashData, l.substring(l.substring(0, l.lastIndexOf(" ", l.indexOf(": "))).length()-1).replaceAll(",? [a-zA-Z]+:?.?[0-9]+","")+"\n");
 			}
 		}catch(Exception ex){System.exit(1);}});
+	}
+	void processCrashDataLine(StringBuilder crashData, String s){
+		if(crashProcessingPauseDetector!=null)crashProcessingPauseDetector.interrupt();
+		else startActivity(new android.content.Intent(ref, BaseApplication.DetectedErrorPrintingActivity.class).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));
+		crashData.append(s);
+		crashProcessingPauseDetector=new Thread(()->{
+			try{Thread.sleep(200);
+				if(!logs.isEmpty()){crashData.append("--------- beginning of my custom logs\n");for(String otherLog: logs){crashData.append(otherLog).append("\n");}}
+				manageCrashReport(crashData.toString(), getExtraData());
+				System.exit(0);// at this point, it is obligatory to kill the process of the app.
+			}catch(Exception e){}
+		});crashProcessingPauseDetector.start();
 	}
 
 	private String getExtraData() throws IllegalAccessException{
